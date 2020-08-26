@@ -136,7 +136,7 @@ EPOCHS = 15
 BATCH_SIZE = 10
 ETA = 1.5
 if get_mnist_data():
-    print('Trainig and Testing every Epoch . . .')
+    print('Training and Testing every Epoch . . .')
     traindata = read()
     testdata = read(dataset='testing')
     network = Model([784, 39, 10], ETA)
