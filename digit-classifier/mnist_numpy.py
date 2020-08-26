@@ -2,6 +2,31 @@ import numpy
 import random
 import time
 import struct
+import requests
+import os
+import gzip
+
+def download_mnist_data(filenames):
+    os.makedirs('data', exist_ok=True)
+    url = 'http://yann.lecun.com/exdb/mnist/'
+    for filename in filenames:
+        print('downloading', filename)
+        r = requests.get(url + filename)
+        if r.status_code != 200:
+            return False
+        open('data/' + filename, 'wb').write(r.content)
+    return True
+
+def decompress_mnist_data(filenames):
+    for filename in filenames:
+        with gzip.open('data/' + filename, 'rb') as fc:
+            with open(filename.split('.')[0], 'wb') as fd:
+                fd.write(fc.read())
+    return True
+
+def get_mnist_data():
+    filenames = ['train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz', 't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
+    return download_mnist_data(filenames) and decompress_mnist_data(filenames)
 
 def read(dataset= 'training', path= './data'):
     if dataset is 'training':
@@ -101,8 +126,11 @@ def test(testdata):
 EPOCHS = 45
 BATCH_SIZE = 10
 ETA = 1.5
-traindata = read()
-testdata = read(dataset='testing')
-network = Model([784, 39, 10], ETA)
-for itr in range(EPOCHS):
-    print(f'Loss: {train(traindata, BATCH_SIZE)} Epoch: {itr} ( {test(testdata)} / {len(testdata)} )')
+if get_mnist_data():
+    traindata = read()
+    testdata = read(dataset='testing')
+    network = Model([784, 39, 10], ETA)
+    for itr in range(EPOCHS):
+        print(f'Loss: {train(traindata, BATCH_SIZE)} Epoch: {itr} ( {test(testdata)} / {len(testdata)} )')
+else:
+    print('Unable to download MNIST dataset')
