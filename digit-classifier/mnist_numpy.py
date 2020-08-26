@@ -39,11 +39,11 @@ def get_mnist_data():
 
 def read(dataset= 'training', path= './data'):
     if dataset is 'training':
-        fname_img = path + '/train-images.idx3-ubyte'
-        fname_lbl = path + '/train-labels.idx1-ubyte'
+        fname_img = path + '/train-images-idx3-ubyte'
+        fname_lbl = path + '/train-labels-idx1-ubyte'
     elif dataset is 'testing':
-        fname_img = path + '/t10k-images.idx3-ubyte'
-        fname_lbl = path + '/t10k-labels.idx1-ubyte'
+        fname_img = path + '/t10k-images-idx3-ubyte'
+        fname_lbl = path + '/t10k-labels-idx1-ubyte'
     else:
         raise ValueError('dataset must be \'testing\' or \'training\'')
     flbl = open(fname_lbl, 'rb')
