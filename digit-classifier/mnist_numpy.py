@@ -6,27 +6,36 @@ import requests
 import os
 import gzip
 
-def download_mnist_data(filenames):
+def download_mnist_data(filename):
+    print('downloading', filename)
     os.makedirs('data', exist_ok=True)
-    url = 'http://yann.lecun.com/exdb/mnist/'
-    for filename in filenames:
-        print('downloading', filename)
-        r = requests.get(url + filename)
-        if r.status_code != 200:
-            return False
-        open('data/' + filename, 'wb').write(r.content)
+    r = requests.get('http://yann.lecun.com/exdb/mnist/' + filename)
+    if r.status_code != 200:
+        return False
+    open('data/' + filename, 'wb').write(r.content)
     return True
 
-def decompress_mnist_data(filenames):
-    for filename in filenames:
-        with gzip.open('data/' + filename, 'rb') as fc:
-            with open(filename.split('.')[0], 'wb') as fd:
-                fd.write(fc.read())
+def decompress_mnist_data(filename):
+    print('decompressing', filename)
+    with gzip.open(f'data/{filename}', 'rb') as fc:
+        with open(f"data/{filename.split('.')[0]}", 'wb') as fd:
+            fd.write(fc.read())
     return True
 
 def get_mnist_data():
-    filenames = ['train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz', 't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
-    return download_mnist_data(filenames) and decompress_mnist_data(filenames)
+    filenames = [
+        'train-images-idx3-ubyte.gz',
+        'train-labels-idx1-ubyte.gz',
+        't10k-images-idx3-ubyte.gz',
+        't10k-labels-idx1-ubyte.gz'
+    ]
+    for filename in filenames:
+        if os.path.exists(f'data/{filename}') or download_mnist_data(filename):
+            if not os.path.exists(f"data/{filename.split('.')[0]}"):
+                decompress_mnist_data(filename)
+        else:
+            return False
+    return True
 
 def read(dataset= 'training', path= './data'):
     if dataset is 'training':
@@ -127,6 +136,7 @@ EPOCHS = 45
 BATCH_SIZE = 10
 ETA = 1.5
 if get_mnist_data():
+    print('starting training . . .')
     traindata = read()
     testdata = read(dataset='testing')
     network = Model([784, 39, 10], ETA)
